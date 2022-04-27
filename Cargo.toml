@@ -1,0 +1,21 @@
+[package]
+name = "legendary-pancake"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "générateur de prophétie aléatoire en wasm"
+repository = "https://github.com/othelarian/legendary-pancake"
+authors = ["othelarian <le.maitre.killian@gmail.com>"]
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+opt-level = 'z'
+lto = true
+
+[dependencies]
+wasm-bindgen = "0.2.80"
+yew = "0.19.3"
