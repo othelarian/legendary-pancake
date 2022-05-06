@@ -3,14 +3,18 @@
   "name": "legendary-pancake",
   "version": "0.1.0",
   "scripts": {
-    "build": "rimraf dist pkg && webpack",
-    "start": "rimraf dist pkg && webpack serve",
-    "test": "cargo test && wasm-pack test --headless"
+    "build": "cake build",
+    "start": "cake serve",
+    "test": ""
   },
   "devDependencies": {
     "bach": "^1.2.0",
     "coffeescript": "^2.7.0",
+    "connect": "^3.7.0",
+    "connect-livereload": "^0.6.1",
+    "livereload": "^0.9.3",
     "rimraf": "^3.0.0",
-    "sass": "^1.51.0"
+    "sass": "^1.51.0",
+    "serve-static": "^1.15.0"
   }
 }

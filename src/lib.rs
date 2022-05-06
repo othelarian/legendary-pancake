@@ -28,6 +28,7 @@ extern "C" {
 #[wasm_bindgen]
 pub fn main_js() -> Result<(), JsValue> {
   //
+  //let version = env!("CARGO_PKG_VERSION");
   //
   //yew::start_app::<App>();
   //
