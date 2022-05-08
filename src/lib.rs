@@ -1,19 +1,16 @@
 use wasm_bindgen::prelude::*;
-//use yew::prelude::*;
+use web_sys::Element;
+use yew::prelude::*;
 
-/*
 #[function_component(App)]
 fn app() -> Html {
   //
   //
-  html! { <h1>{"plop"}</h1> }
+  // TODO: 1st line: launch, version, selector
   //
-}
-*/
-
-#[wasm_bindgen]
-pub fn some_test() -> usize {
-  42
+  //
+  html! { <h1>{"plop hi!"}</h1> }
+  //
 }
 
 #[wasm_bindgen]
@@ -22,16 +19,13 @@ extern "C" {
   fn a_fn() -> String;
 }
 
-//aa
-
-//#[wasm_bindgen(start)]
 #[wasm_bindgen]
-pub fn main_js() -> Result<(), JsValue> {
+pub fn main_js(anchor: Element) {
   //
   //let version = env!("CARGO_PKG_VERSION");
   //
-  //yew::start_app::<App>();
+  a_fn();
   //
-  Ok(())
+  yew::start_app_in_element::<App>(anchor);
   //
 }

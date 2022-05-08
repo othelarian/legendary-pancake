@@ -1,80 +1,127 @@
 bach = require 'bach'
 coffee = require 'coffeescript'
 connect = require 'connect'
-connLr = require 'connect-livereload'
-cp = require 'child_process'
 fs = require 'fs'
 fsp = require 'fs/promises'
 http = require 'http'
 lr = require 'livereload'
+{ extname } = require 'path'
 rimraf = require 'rimraf'
+{ rollup, watch } = require 'rollup'
+rust = require '@wasm-tool/rollup-plugin-rust'
 sass = require 'sass'
 serveStatic = require 'serve-static'
+{ terser } = require 'rollup-plugin-terser'
 
 # OPTIONS #############################
 
-option '-a', '--all', 'build/clean everything (default)'
-option '-w', '--wasm', 'build/clean only wasm part'
-option '-b', '--web', 'build/clean only html/js/css part'
 option '-d', '--debug', 'set compilation mode to debug (default)'
 option '-r', '--release', 'set compilation mode to release'
 
 # GLOBAL VARS #########################
 
 envRelease = false
+watching = false
 
-# PRIVATE FNS #########################
+# ROLLUP PLUGINS ######################
 
-buildProject = (options) ->
-  all = options.all or (not options.wasm and not options.web)
-  if all or options.web
-    startSeries = bach.series createDir, handleHtml,compileSass 
-    endSeries = bach.series compileCoffee, compileJs
-    cbRes = (err, _) -> if err then console.log "error:\r\n#{err}"
-    finalSeries =
-      if all then bach.series startSeries, wasmPack, copyWasm, endSeries
-      else bach.series startSeries, endSeries
-    finalSeries cbRes
-  else if options.wasm then wasmPack -> 42
+rollCoffee = =>
+  name: 'rolling-coffee'
+  transform: (code, id) ->
+    if extname(id) != '.coffee' then return null
+    out = null
+    try
+      out = coffee.compile code
+    catch e
+      throw e
+    code: out
+
+rollHtml = (filename) =>
+  name: 'rolling-html'
+  buildStart: ->
+    this.addWatchFile filename
+  generateBundle: ->
+    cfg =
+      type: 'asset'
+      fileName: filename
+      source: fs.readFileSync filename
+    this.emitFile cfg
+
+rollSass = =>
+  css = ''
+  name: 'rolling-sass'
+  transform: (_, file) ->
+    style = if envRelease then 'compressed' else 'expanded'
+    rendered = sass.compile file, {style}
+    css = rendered.css
+    'export default ""'
+  generateBundle: (options, bundle) ->
+    Object.keys(bundle).forEach (filename) => delete bundle[filename]
+    fs.writeFileSync options.file, css
+    return null
+
+# ACTION FUNCTIONS ####################
 
 checkEnv = (options) ->
   if options.debug and options.release
-    console.error "error: debug and release can't be active in the same time"
+    console.error 'error: debug and release can\'t be active together'
     throw '`debug` and `release` in the same time'
   else
     if options.release then envRelease = true
 
-compileCoffee = (cb) ->
-  filtering = (script) -> /\.coffee$/.test script
-  cfScripts = (await fsp.readdir './scripts').filter filtering
-  for script in cfScripts
-    path = "./scripts/#{script}"
-    res = coffee.compile(fs.readFileSync path, 'utf-8')
-    fs.writeFileSync (path.replace 'coffee', 'js'), res
-  cb null, 0
-
 compileJs = (cb) ->
-  #
-  # TODO
-  #
-  #cb 'jsrollup not ready', null
+  rustCfg =
+    debug: not envRelease
+  inOpts =
+    input: './scripts/index.coffee'
+    plugins: [
+      rollCoffee()
+      rust rustCfg
+      ]
+  outOpts =
+    file: './dist/index.js'
+    format: 'iife'
+    assetFileNames: 'wasm/[name][extname]'
+    plugins: (if envRelease then [terser()] else [])
+  bundle = await rollup inOpts
+  await bundle.write outOpts
+  stmp = new Date().toLocaleString()
+  console.log "#{stmp} => coffee/wasm compilation done"
   cb null, 0
 
 compileSass = (cb) ->
-  style = if envRelease then 'compressed' else 'expanded'
-  try
-    res = sass.compile 'style.sass', {style}
-    fsp.writeFile './dist/style.css', res.css
-  catch e
-    cb e, null
+  targets =
+    targets: [{src: 'index.html', dest: './dist'}]
+    copyOnce: true
+  inOpts =
+    input: './style.sass'
+    plugins: [rollSass(), rollHtml 'index.html']
+  outOpts =
+    file: './dist/style.css'
+    exports: 'default'
+    format: 'cjs'
+  if watching
+    watcher = watch {inOpts..., output: outOpts}
+    watcher.on 'event', (event) =>
+      if event.code == 'ERROR' then console.log event.error
+      else if event.code == 'END'
+        stmp = new Date().toLocaleString()
+        console.log "#{stmp} => sass/html compilation done"
+    cb null, 0
+  else
+    sass = await rollup inOpts
+    await sass.write outOpts
+    stmp = new Date().toLocaleString()
+    console.log "#{stmp} => sass/html compilation done"
+    cb null, 0
 
-copyWasm = (cb) ->
-  #
-  # TODO
-  #
-  #
-  cb 'copyWasm not ready', null
-  #
+copyDevin = (cb) ->
+  args = {force: true, recursive: true}
+  fs.cp './devin', './dist/devin', args, (r) ->
+    if r? then cb r, null
+    else
+      console.log 'copy devin files => done'
+      cb null, 0
 
 createDir = (cb) ->
   try
@@ -86,67 +133,48 @@ createDir = (cb) ->
       cb null, 1
     else cb e, null
 
-handleHtml = (cb) -> fsp.cp './index.html', './dist/index.html'
-
 launchServer = ->
+  console.log 'launching server...'
   app = connect()
-  #
-  # TODO: check if wasm is delivered with the right mime-type
-  #
-  app.use connLr()
   app.use(serveStatic './dist')
-  #
-  # TODO: check if wasm is watched, I think I need to add extraExts option
-  #
   http.createServer(app).listen 5000
   lrServer = lr.createServer()
+  console.log __dirname
   lrServer.watch './dist'
-
-wasmPack = (cb) ->
-  mode = if envRelease then '--release' else '--debug'
-  cp = cp.spawn 'wasm-pack', ['build', envRelease], {stdio: 'inherit'}
-  cp.on 'error', (err) => cb(err, null)
-  cp.on 'close', (code) => cb(null, 0)
-
-watchSource = ->
-  #
-  # TODO
-  #
-  console.log 'watchSource'
-  #
-  #cb null, 0
-  42
-  #
 
 # TASKS ###############################
 
-task 'build', 'build the app', (options) ->
+task 'build', 'build the app (core + sass + wasm)', (options) ->
   checkEnv options
-  buildProject options
+  console.log 'building...'
+  building = bach.series copyDevin, compileSass, compileJs
+  building (e, _) ->
+    if e?
+      console.log 'Something go wrong'
+      console.log e
+    else console.log 'building => done'
 
-task 'clean', 'clean the different parts of the app', (options) ->
-  console.log 'cleaning app...'
-  all = options.all or (not options.wasm and not options.web)
-  switch
-    when all or options.web
-      console.log 'cleaning ./dist...'
-      rimraf './dist', (r) => 42 #console.log e
-      rimraf './scripts/*.js', (r) => 42 #console.log e
-    when all or options.wasm
-      console.log 'cleaning ./pkg ...'
-      rimraf './pkg', (r) => 42 #console.log e
-  console.log 'cleaning done!'
+task 'clean', 'rm ./dist', (options) ->
+  console.log 'cleaning `dist`...'
+  rimraf './dist', (e) =>
+    if e? then console.log e
+    else console.log '`dist` removed successfully'
+
+task 'sass', 'compile only sass and html', (options) ->
+  checkEnv options
+  sassing = bach.series createDir, compileSass
+  sassing (e, _) -> if e? then console.log e
 
 task 'serve', 'launch a micro server and watch files', (options) ->
-  #bach.parallel watchSource, launchServer
-  #
-  # TODO: if --release then return, no release mode with 'serve'
-  #
-  launchServer()
-  #
-  watchSource()
-  #
-
-task 'wasm', 'only compile wasm, shortcut for `cake -w build`', (options) ->
   checkEnv options
-  wasmPack => 42
+  if envRelease
+    console.error 'Impossible to use `serve` in `release` mode!'
+  else
+    watching = true
+    serving = bach.series copyDevin, compileJs,
+      (bach.parallel compileSass, launchServer)
+    serving (e, _) -> if e? then console.log e
+
+task 'wasm', 'use rollup to compile wasm and coffee', (options) ->
+  checkEnv options
+  compileJs => 42

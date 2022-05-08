@@ -1,8 +1,5 @@
 node_modules
 /dist
 /target
-/pkg
-/wasm-pack.log
 Cargo.lock
 package-lock.json
-scripts/*.js
