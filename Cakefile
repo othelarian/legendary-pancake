@@ -20,6 +20,7 @@ option '-r', '--release', 'set compilation mode to release'
 
 # GLOBAL VARS #########################
 
+dest = ''
 envRelease = false
 watching = false
 
@@ -68,6 +69,7 @@ checkEnv = (options) ->
     throw '`debug` and `release` in the same time'
   else
     if options.release then envRelease = true
+  dest = if envRelease then 'docs' else 'dist'
 
 compileJs = (cb) ->
   rustCfg =
@@ -79,7 +81,7 @@ compileJs = (cb) ->
       rust rustCfg
       ]
   outOpts =
-    file: './dist/index.js'
+    file: "./#{dest}/index.js"
     format: 'iife'
     assetFileNames: 'wasm/[name][extname]'
     plugins: (if envRelease then [terser()] else [])
@@ -91,13 +93,13 @@ compileJs = (cb) ->
 
 compileSass = (cb) ->
   targets =
-    targets: [{src: 'index.html', dest: './dist'}]
+    targets: [{src: 'index.html', dest: "./#{dest}"}]
     copyOnce: true
   inOpts =
     input: './style.sass'
     plugins: [rollSass(), rollHtml 'index.html']
   outOpts =
-    file: './dist/style.css'
+    file: "./#{dest}/style.css"
     exports: 'default'
     format: 'cjs'
   if watching
@@ -117,7 +119,7 @@ compileSass = (cb) ->
 
 copyDevin = (cb) ->
   args = {force: true, recursive: true}
-  fs.cp './devin', './dist/devin', args, (r) ->
+  fs.cp './devin', "./#{dest}/devin", args, (r) ->
     if r? then cb r, null
     else
       console.log 'copy devin files => done'
@@ -125,11 +127,12 @@ copyDevin = (cb) ->
 
 createDir = (cb) ->
   try
-    await fsp.mkdir './dist'
+    await fsp.mkdir "./#{dest}"
     cb null, 0
   catch e
     if e.code = 'EEXIST'
-      console.warn 'Warning: \'dist\' already exists'
+      if not envRelease
+        console.warn 'Warning: \'dist\' already exists'
       cb null, 1
     else cb e, null
 

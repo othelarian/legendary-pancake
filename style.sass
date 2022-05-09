@@ -1,5 +1,71 @@
+$back: #1e2727
+$lightback : #25302f
+$lighterback: #384746
+$basecol: #c5c2a9
+$border: ridge 5px darkgoldenrod
+$borderrad: 15px
+
+body
+  background: $back
+  color: $basecol
+  font-size: 16px
+
+button
+  background: $lightback
+  border: $border
+  border-radius: $borderrad
+  color: $basecol
+  font-weight: bold
+  padding: 7px
+
+  &:hover
+    background: $lighterback
+  
+  &:active
+    background: $back
+    color: darkgoldenrod
+
 h1
-  color: green
+  color: darkgoldenrod
+  font-variant: small-caps
+  font-size: 38px
+  text-decoration: underline
+  margin: 0px auto
+  font-weight: normal
 
 h2
   font-weight: bold
+  font-size: 24px
+  margin: 10px auto
+
+h3
+  color: darkgoldenrod
+  max-width: 430px
+  text-align: right
+  margin: 10px auto
+  font-style: italic
+
+.lp-body
+  max-width: 600px
+  margin: auto
+
+.lp-veil
+  position: absolute
+  top: 0
+  bottom: 0
+  left: 0
+  right: 0
+  background: #000b
+
+  .lp-thanks
+    position: absolute
+    top: 7%
+    left: calc(50% - 120px)
+    right: calc(50% - 120px)
+    width: 240px
+    box-sizing: border-box
+    padding: 10px
+    background: $back
+    color: $basecol
+    border: $border
+    border-radius: $borderrad
