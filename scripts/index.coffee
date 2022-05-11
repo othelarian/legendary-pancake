@@ -9,6 +9,11 @@ trgs = [];
 LP =
   evtsMax: -> evts.length
   genProphetie: (trgs_lst, evts_lst) ->
+    #
+    console.log trgs_lst
+    console.log evts_lst
+    return 'blob'
+    #
     p = trgs[trgs_lst[0]]
     if trgs_lst.length > 1
       t = trgs[trgs_lst[1]]
