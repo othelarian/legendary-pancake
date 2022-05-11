@@ -31,9 +31,9 @@ initLP = ->
   events = await fetch 'devin/events.txt'
   triggers = await fetch 'devin/triggers.txt'
   evts = (await events.text()).split '\r\n'
-  if evts.lenth == 1 then evts = evts.split '\n'
+  if evts.length == 1 then evts = evts[0].split '\n'
   trgs = (await triggers.text()).split '\r\n'
-  if trgs.lenth == 1 then trgs = trgs.split '\n'
+  if trgs.length == 1 then trgs = trgs[0].split '\n'
   # ACTIVATE WASM ###########
   wait_time = 1500
   await sleep wait_time
