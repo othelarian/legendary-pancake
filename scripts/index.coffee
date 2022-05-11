@@ -9,21 +9,11 @@ trgs = [];
 LP =
   evtsMax: -> evts.length
   genProphetie: (trgs_lst, evts_lst) ->
-    #
-    console.log trgs_lst
-    console.log evts_lst
-    #
     p = trgs[trgs_lst[0]]
-    #
-    console.log trgs[trgs_lst[0]]
-    #
     if trgs_lst.length > 1
       t = trgs[trgs_lst[1]]
       p = p + ', et ' + t[0].toLowerCase() + t.substring(1)
     p += ', '
-    #
-    console.log p
-    #
     evts_lst = evts_lst.map (x) => evts[x]
     p + evts_lst.join ', et '
   rnd: (top) -> Math.floor(Math.random() * top)
@@ -41,7 +31,9 @@ initLP = ->
   events = await fetch 'devin/events.txt'
   triggers = await fetch 'devin/triggers.txt'
   evts = (await events.text()).split '\r\n'
+  if evts.lenth == 1 then evts = evts.split '\n'
   trgs = (await triggers.text()).split '\r\n'
+  if trgs.lenth == 1 then trgs = trgs.split '\n'
   # ACTIVATE WASM ###########
   wait_time = 1500
   await sleep wait_time

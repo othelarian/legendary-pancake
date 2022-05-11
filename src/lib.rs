@@ -2,10 +2,10 @@ use wasm_bindgen::prelude::*;
 use web_sys::Element;
 use yew::prelude::*;
 
-//extern crate wee_alloc;
+extern crate wee_alloc;
 
-//#[global_allocator]
-//static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[derive(PartialEq)]
 enum NbPropheties {
@@ -13,41 +13,16 @@ enum NbPropheties {
 }
 
 fn get_prophetie() -> String {
-  //
-  log("entering get_prophetie");
-  //
   let trgs_max = trgsMax();
   let evts_max = evtsMax();
-  //
-  log(&format!("get the maxes({}, {})", trgs_max, evts_max));
-  //
   let mut trgs = vec!(rnd(trgs_max));
-  //
-  log("get the first trigger");
-  //
   if rnd(40) == 39 {
-    //
-    log("going for a second trigger");
-    //
-    let mut lmt = 1000;
-    //
-    while trgs.len() < 2 && lmt > 0 {
-      //
-      log("steping in the first loop");
-      //
+    while trgs.len() < 2 {
       let tmp = rnd(trgs_max);
       if trgs.iter().position(|x| x == &tmp).is_none() { trgs.push(tmp); }
-      lmt -= 1;
     }
-    //
-    if lmt == 0 { log("something went wrong, first limit"); panic!(); }
-    //
   }
-  //
   let evt_rnd = rnd(500);
-  //
-  log(&format!("number of event (rnd): {}", evt_rnd));
-  //
   let nb_evts = match evt_rnd {
     0..=124 => 1,
     125..=369 => 2,
@@ -56,33 +31,15 @@ fn get_prophetie() -> String {
     490..=498 => 5,
     _ => 6
   };
-  //
-  log(&format!("Number of event (real): {}", nb_evts));
-  //
   let evts = if nb_evts == 1 { vec!(rnd(evts_max)) }
   else {
-    //
-    //
     let mut v = vec!(rnd(evts_max));
-    //
-    log("first event confirmed");
-    //
-    let mut lmt = 1000;
-    //
     while v.len() < nb_evts {
       let tmp = rnd(evts_max);
       if v.iter().position(|x| x == &tmp).is_none() { v.push(tmp); }
-      //
-      lmt -= 1;
-      //
     }
-    //
-    if lmt == 0 { log("something went wrong, second limit"); panic!(); }
-    //
     v
   };
-  //
-  //
   genProphetie(
     JsValue::from_serde(&trgs).unwrap(),
     JsValue::from_serde(&evts).unwrap()
@@ -107,9 +64,6 @@ fn app() -> Html {
     let propheties_active = propheties_active.clone();
     let propheties_old = propheties_old.clone();
     Callback::from(move |_| {
-    //
-    log("entering prophetie callback");
-    //
     let new_active = match *prophetie_select {
       NbPropheties::One => vec!(get_prophetie()),
       NbPropheties::Five => (0..5).map(|_| get_prophetie()).collect(),
