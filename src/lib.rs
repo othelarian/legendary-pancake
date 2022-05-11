@@ -17,10 +17,17 @@ fn get_prophetie() -> String {
   let evts_max = evtsMax();
   let mut trgs = vec!(rnd(trgs_max));
   if rnd(40) == 39 {
-    while trgs.len() < 2 {
+    //
+    let mut lmt = 1000;
+    //
+    while trgs.len() < 2 && lmt > 0 {
       let tmp = rnd(trgs_max);
       if trgs.iter().position(|x| x == &tmp).is_none() { trgs.push(tmp); }
+      lmt -= 1;
     }
+    //
+    if lmt == 0 { log("something went wrong, first limit"); panic!(); }
+    //
   }
   let evt_rnd = rnd(500);
   let nb_evts = match evt_rnd {
@@ -34,10 +41,19 @@ fn get_prophetie() -> String {
   let evts = if nb_evts == 1 { vec!(rnd(evts_max)) }
   else {
     let mut v = vec!(rnd(evts_max));
+    //
+    let mut lmt = 1000;
+    //
     while v.len() < nb_evts {
       let tmp = rnd(evts_max);
       if v.iter().position(|x| x == &tmp).is_none() { v.push(tmp); }
+      //
+      lmt -= 1;
+      //
     }
+    //
+    if lmt == 0 { log("something went wrong, second limit"); panic!(); }
+    //
     v
   };
   genProphetie(
