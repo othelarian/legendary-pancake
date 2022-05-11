@@ -10,10 +10,11 @@
     <div class="lp-body">
       <h1>Legendary Pancake</h1>
       <h3>Le générateur de prophéties</h3>
-      <p id="lp-loading">Veuillez patientez, le devin arrive ...</p>
-      <p id="lp-waiter1" style="display:none">... Et ça peut prendre longtemps ...</p>
-      <p id="lp-waiter2" style="display:none">... Mais vraiment longtemps ...</p>
-      <div id="lp-wasm"></div>
+      <article id="lp-core">
+        <p id="lp-loading">Veuillez patientez, le devin arrive ...</p>
+        <p id="lp-waiter1" style="display:none">... Et ça peut prendre longtemps ...</p>
+        <p id="lp-waiter2" style="display:none">... Mais vraiment longtemps ...</p>
+      </article>
     </div>
     <div class="lp-veil" id="lp-veil" style="display:none">
       <div class="lp-thanks">
@@ -29,7 +30,7 @@
         </ul>
         <p>Un grand merci à vous.</p>
         <p style="text-align:center">
-          <button id="lp-thanks-close">Fermer</button>
+          <button class="lp-btn" id="lp-thanks-close">Fermer</button>
         </p>
       </div>
     </div>

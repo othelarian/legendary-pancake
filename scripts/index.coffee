@@ -1,12 +1,13 @@
 import lp from '../Cargo.toml'
 
 getId = (id) -> document.getElementById id
-
 sleep = (ms) -> new Promise (resolve) => setTimeout(resolve, ms)
 
-window.showVeil = ->
-  getId('lp-veil').style.display = 'block'
-  return
+LP =
+  rnd: (top) -> Math.floor(Math.random() * top)
+  showVeil: ->
+    getId('lp-veil').style.display = 'block'
+    return
 
 initLP = ->
   # SET VEIL ################
@@ -23,22 +24,19 @@ initLP = ->
   #console.log await events.text()
   #
   # ACTIVATE WASM ###########
-  await sleep 2500
-  #
-  # TODO: adding a chance to get the waiter
-  #
-  getId('lp-waiter1').style.display = 'block'
-  await sleep 2500
-  getId('lp-waiter2').style.display = 'block'
-  await sleep 2500
+  wait_time = 1500
+  await sleep wait_time
+  wait = false
+  if (LP.rnd 5) == 5
+    wait = wait_time
+    getId('lp-waiter1').style.display = 'block'
+    await sleep 1500
+  if wait and (LP.rnd 10) == 10
+    getId('lp-waiter2').style.display = 'block'
+    await sleep wait_time
   app = await lp()
-  console.log 'launching wasm'
-  #
-  # TODO: launch the app
-  #
-  #
-  #
-  #app.main_js getId 'lp-wasm'
+  app.main_js getId 'lp-core'
   return
 
+window.LP = LP
 window.launchLP = initLP

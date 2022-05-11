@@ -1,37 +1,52 @@
 $back: #1e2727
-$lightback : #25302f
-$lighterback: #384746
+$lightback : #2f3c3b
+$lighterback: #556463
+$darkback: #151b1b
 $basecol: #c5c2a9
 $border: ridge 5px darkgoldenrod
-$borderrad: 15px
+$border_rad: 15px
+
+$btn_font_size: 15px
+
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap')
+
+// ##########################
+
+%title
+  color: darkgoldenrod
+  -webkit-text-stroke: .2px orange
+  text-shadow: .4px .4px gold
+
+%button
+  &:hover
+    background: $lighterback
+    color: #e7bc00
+
+  &:active
+    background: $back
+    color: darkgoldenrod
+
+
+// ##########################
 
 body
+  font-family: 'MedievalSharp'
   background: $back
   color: $basecol
   font-size: 16px
 
 button
+  font-family: 'MedievalSharp'
+  font-size: $btn_font_size
   background: $lightback
-  border: $border
-  border-radius: $borderrad
   color: $basecol
-  font-weight: bold
-  padding: 7px
-
-  &:hover
-    background: $lighterback
-  
-  &:active
-    background: $back
-    color: darkgoldenrod
 
 h1
-  color: darkgoldenrod
+  @extend %title
   font-variant: small-caps
   font-size: 38px
   text-decoration: underline
   margin: 0px auto
-  font-weight: normal
 
 h2
   font-weight: bold
@@ -39,15 +54,85 @@ h2
   margin: 10px auto
 
 h3
-  color: darkgoldenrod
+  @extend %title
   max-width: 430px
   text-align: right
   margin: 10px auto
   font-style: italic
+  font-size: 21px
+  font-weight: normal
+
+h4
+  @extend %title
+  text-align: center
+  margin: 10px auto
+  font-weight: normal
+  font-size: 18px
+
+hr
+  margin: 14px auto
+  width: 70%
+  border: none
+  border-top: dotted 3px darkgoldenrod
 
 .lp-body
   max-width: 600px
   margin: auto
+
+.lp-btn
+  @extend %button
+  height: 40px
+  border: $border
+  border-radius: $border_rad
+
+.lp-controls
+  display: flex
+  justify-content: center
+  flex-wrap: wrap
+
+.lp-prophetie
+  border: $border
+  border-radius: 20px
+  padding: 12px
+  margin: 10px 40px
+  box-sizing: border-box
+  text-align: center
+
+  &.lp-old
+    border-color: goldenrod
+    border-width: 3px
+    background: $lighterback
+
+.lp-selector
+  $radius: 10px
+
+  display: inline-block
+  border: $border
+  border-radius: $border_rad
+  padding: 0
+  min-width: max-content
+
+  button
+    height: 30px
+    margin: 0
+    border: none
+  
+  button:first-child
+    border-radius: $radius 0 0 $radius
+  
+  button:nth-child(2)
+    border-right: solid 1px black
+    border-left: solid 1px black
+
+  button:nth-child(3)
+    border-radius: 0 $radius $radius 0
+
+  .seld
+    background: $darkback
+    color: #ff8038
+  
+  .notseld
+    @extend %button
 
 .lp-veil
   position: absolute
@@ -68,4 +153,10 @@ h3
     background: $back
     color: $basecol
     border: $border
-    border-radius: $borderrad
+    border-radius: $border_rad
+
+.lp-vers-btn
+  border: none
+  background: $back
+  font-family: 'MedievalSharp'
+  color: $basecol
