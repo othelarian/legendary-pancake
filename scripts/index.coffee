@@ -3,11 +3,24 @@ import lp from '../Cargo.toml'
 getId = (id) -> document.getElementById id
 sleep = (ms) -> new Promise (resolve) => setTimeout(resolve, ms)
 
+evts = [];
+trgs = [];
+
 LP =
+  evtsMax: -> evts.length
+  genProphetie: (trgs_lst, evts_lst) ->
+    p = trgs[trgs_lst[0]]
+    if trgs_lst.length > 1
+      t = trgs[trgs_lst[1]]
+      p = p + ', et ' + t[0].toLowerCase() + t.substring(1)
+    p += ', '
+    evts_lst = evts_lst.map (x) => evts[x]
+    p + evts_lst.join ', et '
   rnd: (top) -> Math.floor(Math.random() * top)
   showVeil: ->
     getId('lp-veil').style.display = 'block'
     return
+  trgsMax: -> trgs.length
 
 initLP = ->
   # SET VEIL ################
@@ -15,14 +28,10 @@ initLP = ->
   .addEventListener 'click', =>
     getId('lp-veil').style.display = 'none'
   # GET THE DEVIN ###########
-  #
   events = await fetch 'devin/events.txt'
   triggers = await fetch 'devin/triggers.txt'
-  #
-  # TODO: load devin triggers and events
-  #
-  #console.log await events.text()
-  #
+  evts = (await events.text()).split '\r\n'
+  trgs = (await triggers.text()).split '\r\n'
   # ACTIVATE WASM ###########
   wait_time = 1500
   await sleep wait_time

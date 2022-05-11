@@ -1,8 +1,8 @@
 # legendary-pancake
 
-Générateur de prophétie en wasm
+Générateur de prophétie en wasm.
 
-TODO : url a fournir vers le io
+[Pour le tester, c'est ici](https://othelarian.github.io/legendary-pancake/)
 
 ## Dev Mode
 

@@ -12,13 +12,46 @@ enum NbPropheties {
   One, Five, Ten
 }
 
+fn get_prophetie() -> String {
+  let trgs_max = trgsMax();
+  let evts_max = evtsMax();
+  let mut trgs = vec!(rnd(trgs_max));
+  if rnd(40) == 39 {
+    while trgs.len() < 2 {
+      let tmp = rnd(trgs_max);
+      if trgs.iter().position(|x| x == &tmp).is_none() { trgs.push(tmp); }
+    }
+  }
+  let evt_rnd = rnd(500);
+  let nb_evts = match evt_rnd {
+    0..=124 => 1,
+    125..=369 => 2,
+    370..=469 => 3,
+    470..=489 => 4,
+    490..=498 => 5,
+    _ => 6
+  };
+  let evts = if nb_evts == 1 { vec!(rnd(evts_max)) }
+  else {
+    let mut v = vec!(rnd(evts_max));
+    while v.len() < nb_evts {
+      let tmp = rnd(evts_max);
+      if v.iter().position(|x| x == &tmp).is_none() { v.push(tmp); }
+    }
+    v
+  };
+  genProphetie(
+    JsValue::from_serde(&trgs).unwrap(),
+    JsValue::from_serde(&evts).unwrap()
+  )
+}
+
 #[function_component(App)]
 fn app() -> Html {
   // STATES ######################
   let prophetie_select = use_state_eq(|| NbPropheties::One);
-  //
-  // TODO: 1st line: launch, version, selector
-  //
+  let propheties_active = use_state(|| Vec::new());
+  let propheties_old = use_state(|| Vec::new());
   // CONFIGS #####################
   let (sel1, sel2, sel3) = match *prophetie_select {
     NbPropheties::One => ("seld", "notseld", "notseld"),
@@ -28,10 +61,20 @@ fn app() -> Html {
   // CBS #########################
   let get_prophetie_cb = {
     let prophetie_select = prophetie_select.clone();
-    Callback::from(|_| {
-    //
-    // TODO
-    //
+    let propheties_active = propheties_active.clone();
+    let propheties_old = propheties_old.clone();
+    Callback::from(move |_| {
+    let new_active = match *prophetie_select {
+      NbPropheties::One => vec!(get_prophetie()),
+      NbPropheties::Five => (0..5).map(|_| get_prophetie()).collect(),
+      NbPropheties::Ten => (0..10).map(|_| get_prophetie()).collect()
+    };
+    let mut tmp = (*propheties_old).clone();
+    propheties_active.iter().rev()
+      .for_each(|e: &String| tmp.insert(0, e.clone()) );
+    if tmp.len() > 100 { let _ = tmp.split_off(100); }
+    propheties_active.set(new_active);
+    propheties_old.set(tmp);
     })
   };
   let veil_cb = Callback::from(|_| showVeil());
@@ -47,6 +90,11 @@ fn app() -> Html {
     let prophetie_select = prophetie_select.clone();
     Callback::from(move |_| prophetie_select.set(NbPropheties::Ten))
   };
+  // PARTIALS ####################
+  let actives: Html = propheties_active.iter().map(|prophetie|
+    html! {<div class="lp-prophetie">{prophetie}</div>}).collect();
+  let olds: Html = propheties_old.iter().map(|prophetie: &String|
+    html! {<div class="lp-prophetie lp-old">{prophetie}</div>}).collect();
   // HTML ########################
   html! {
     <>
@@ -64,29 +112,17 @@ fn app() -> Html {
         </div>
       </div>
       <hr />
-      <div>
-        //
-        // TODO: move the list into a new component
-        //
-        <div class="lp-prophetie">
-          {"Quand le soleil disparaît sous un nuage en forme de serpent, les bouquets du dieu marin descendent du ciel, et l'Esprit détruit les âmes des impies"}
-        </div>
-        <div class="lp-prophetie">
-          {"Quand le soleil disparaît sous un nuage en forme de serpent, les bouquets du dieu marin descendent du ciel, et l'Esprit détruit les âmes des impies"}
-        </div>
-        //
+      <div class="lp-propheties">
+        if propheties_active.len() == 0 {
+          <div class="lp-no-prophetie">
+            {"L'oracle ne c'est pas encore exprimé ..."}
+          </div>
+        } else { {actives} }
       </div>
       <hr />
-      <div>
-        <h4 class="lp-historic">{"Anciennes prophéties"}</h4>
-        //
-        // TODO: move the list into a new component
-        //
-        <div class="lp-prophetie lp-old">
-          {"Quand le soleil disparaît sous un nuage en forme de serpent, les bouquets du dieu marin descendent du ciel, et l'Esprit détruit les âmes des impies"}
-        </div>
-        //
-      </div>
+      if propheties_old.len() > 0 {
+        <div><h4 class="lp-historic">{"Anciennes prophéties"}</h4>{olds}</div>
+      }
     </>
   }
 }
@@ -94,8 +130,21 @@ fn app() -> Html {
 #[wasm_bindgen]
 extern "C" {
   #[wasm_bindgen(js_namespace = LP)]
+  fn evtsMax() -> usize;
+
+  #[wasm_bindgen(js_namespace = LP)]
+  fn genProphetie(triggers: JsValue, events: JsValue) -> String;
+
+  #[wasm_bindgen(js_namespace = LP)]
+  fn rnd(top: usize) -> usize;
+
+  #[wasm_bindgen(js_namespace = LP)]
   fn showVeil();
 
+  #[wasm_bindgen(js_namespace = LP)]
+  fn trgsMax() -> usize;
+
+  // TODO: remove after use
   #[wasm_bindgen(js_namespace = console)]
   fn log(s: &str);
 }
