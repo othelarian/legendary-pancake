@@ -9,11 +9,21 @@ trgs = [];
 LP =
   evtsMax: -> evts.length
   genProphetie: (trgs_lst, evts_lst) ->
+    #
+    console.log trgs_lst
+    console.log evts_lst
+    #
     p = trgs[trgs_lst[0]]
+    #
+    console.log trgs[trgs_lst[0]]
+    #
     if trgs_lst.length > 1
       t = trgs[trgs_lst[1]]
       p = p + ', et ' + t[0].toLowerCase() + t.substring(1)
     p += ', '
+    #
+    console.log p
+    #
     evts_lst = evts_lst.map (x) => evts[x]
     p + evts_lst.join ', et '
   rnd: (top) -> Math.floor(Math.random() * top)

@@ -13,14 +13,28 @@ enum NbPropheties {
 }
 
 fn get_prophetie() -> String {
+  //
+  log("entering get_prophetie");
+  //
   let trgs_max = trgsMax();
   let evts_max = evtsMax();
+  //
+  log(&format!("get the maxes({}, {})", trgs_max, evts_max));
+  //
   let mut trgs = vec!(rnd(trgs_max));
+  //
+  log("get the first trigger");
+  //
   if rnd(40) == 39 {
+    //
+    log("going for a second trigger");
     //
     let mut lmt = 1000;
     //
     while trgs.len() < 2 && lmt > 0 {
+      //
+      log("steping in the first loop");
+      //
       let tmp = rnd(trgs_max);
       if trgs.iter().position(|x| x == &tmp).is_none() { trgs.push(tmp); }
       lmt -= 1;
@@ -29,7 +43,11 @@ fn get_prophetie() -> String {
     if lmt == 0 { log("something went wrong, first limit"); panic!(); }
     //
   }
+  //
   let evt_rnd = rnd(500);
+  //
+  log(&format!("number of event (rnd): {}", evt_rnd));
+  //
   let nb_evts = match evt_rnd {
     0..=124 => 1,
     125..=369 => 2,
@@ -38,9 +56,16 @@ fn get_prophetie() -> String {
     490..=498 => 5,
     _ => 6
   };
+  //
+  log(&format!("Number of event (real): {}", nb_evts));
+  //
   let evts = if nb_evts == 1 { vec!(rnd(evts_max)) }
   else {
+    //
+    //
     let mut v = vec!(rnd(evts_max));
+    //
+    log("first event confirmed");
     //
     let mut lmt = 1000;
     //
@@ -56,6 +81,8 @@ fn get_prophetie() -> String {
     //
     v
   };
+  //
+  //
   genProphetie(
     JsValue::from_serde(&trgs).unwrap(),
     JsValue::from_serde(&evts).unwrap()
@@ -80,6 +107,9 @@ fn app() -> Html {
     let propheties_active = propheties_active.clone();
     let propheties_old = propheties_old.clone();
     Callback::from(move |_| {
+    //
+    log("entering prophetie callback");
+    //
     let new_active = match *prophetie_select {
       NbPropheties::One => vec!(get_prophetie()),
       NbPropheties::Five => (0..5).map(|_| get_prophetie()).collect(),
