@@ -1,6 +1,6 @@
 [package]
 name = "legendary-pancake"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 description = "générateur de prophétie aléatoire en wasm"

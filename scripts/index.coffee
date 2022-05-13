@@ -15,7 +15,13 @@ LP =
       p = p + ', et ' + t[0].toLowerCase() + t.substring(1)
     p += ', '
     evts_lst = evts_lst.map (x) => evts[x]
-    p + evts_lst.join ', et '
+    if evts_lst.length == 1 then p + evts_lst[0]
+    else
+      inter = (LP.rnd(3) for _ in [(evts_lst.length - 2)..0])
+        .map (x) => if x == 0 then ', ' else ', et '
+      p + evts_lst
+        .flatMap (e, i) => if i >= inter.length then [e, ''] else [e, inter[i]]
+        .join('')
   rnd: (top) -> Math.floor(Math.random() * top)
   showVeil: ->
     getId('lp-veil').style.display = 'block'

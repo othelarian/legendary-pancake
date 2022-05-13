@@ -22,14 +22,13 @@ fn get_prophetie() -> String {
       if trgs.iter().position(|x| x == &tmp).is_none() { trgs.push(tmp); }
     }
   }
-  let evt_rnd = rnd(500);
+  let evt_rnd = rnd(100);
   let nb_evts = match evt_rnd {
-    0..=124 => 1,
-    125..=369 => 2,
-    370..=469 => 3,
-    470..=489 => 4,
-    490..=498 => 5,
-    _ => 6
+    0..=26 => 1,
+    27..=77 => 2,
+    78..=96 => 3,
+    97..=99 => 4,
+    _ => 5,
   };
   let evts = if nb_evts == 1 { vec!(rnd(evts_max)) }
   else {
