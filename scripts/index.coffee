@@ -12,7 +12,7 @@ LP =
     p = trgs[trgs_lst[0]]
     if trgs_lst.length > 1
       t = trgs[trgs_lst[1]]
-      p = p + ', et ' + t[0].toLowerCase() + t.substring(1)
+      p = p + ' et ' + t[0].toLowerCase() + t.substring(1)
     p += ', '
     evts_lst = evts_lst.map (x) => evts[x]
     if evts_lst.length == 1 then p + evts_lst[0]
