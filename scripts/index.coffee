@@ -3,8 +3,8 @@ import lp from '../Cargo.toml'
 getId = (id) -> document.getElementById id
 sleep = (ms) -> new Promise (resolve) => setTimeout(resolve, ms)
 
-evts = [];
-trgs = [];
+evts = []
+trgs = []
 
 LP =
   evtsMax: -> evts.length
